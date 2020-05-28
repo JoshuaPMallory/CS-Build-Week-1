@@ -1,5 +1,6 @@
 import sys
 from os import system, name
+from time import sleep
 
 import numpy as np
 
@@ -54,5 +55,13 @@ class GOL():
 			except KeyboardInterrupt:
 				break
 
+	def skip(self, gen):
+		while gen != 0:
+			gen -= 1
+			self.step()
+		self.display()
+
 stuff = GOL()
-stuff.play()
+stuff.skip(10)
+sleep(1)
+# stuff.play()

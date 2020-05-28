@@ -6,10 +6,20 @@ import numpy as np
 
 
 class GOL():
-	def __init__(self, grid = np.matrix([])):
+	def __init__(self):
 		self.dim    = [29, 119] # 29, 119
 		self.grid   = np.matrix(np.random.choice([False, True], size = self.dim))
 		self.conv   = {False: ' ', True: '█'}
+
+	def save(self):
+		with open('grid.txt','wb') as file:
+		    for line in self.grid:
+		        np.savetxt(file, line, fmt = '%.2f')
+		print('Saved!')
+
+	def load(self, file):
+		self.grid = np.loadtxt(file)
+		print('Loaded!')
 
 	def step(self):
 		grid = self.grid.copy()
@@ -18,13 +28,12 @@ class GOL():
 				summy = self.grid[x - 1:x + 2
 					             ,y - 1:y + 2].sum()
 
-				if self.grid[x, y] == 1:
+				if self.grid[x, y] == True:
 					if summy < 3 or summy > 4:
-						grid[x, y] = 0
+						grid[x, y] = False
 				else:
 					if summy == 3:
-						grid[x, y] = 1
-
+						grid[x, y] = True
 		self.grid = grid
 
 	def clear(self):
@@ -62,6 +71,7 @@ class GOL():
 		self.display()
 
 stuff = GOL()
-stuff.skip(10)
-sleep(1)
-# stuff.play()
+# stuff.load('grid.txt')
+# stuff.skip(10)
+# sleep(1)
+stuff.play()

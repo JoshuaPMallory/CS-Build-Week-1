@@ -2,39 +2,65 @@ import sys
 from os import system, name
 from time import sleep
 
-import numpy as np
+# import pygame
+# from pygame.locals import *
+from numpy import random, matrix, savetxt, loadtxt
 
 
 class GOL():
-	def __init__(self):
-		self.dim    = [29, 119] # 29, 119
-		self.grid   = np.matrix(np.random.choice([False, True], size = self.dim))
+	def __init__(self, dim = (29, 120)): # 29, 119
+		self.dim    = dim
+		self.frames = [matrix(random.choice([False], size = self.dim))]
 		self.conv   = {False: ' ', True: '█'}
 
-	def save(self):
-		with open('grid.txt','wb') as file:
-		    for line in self.grid:
-		        np.savetxt(file, line, fmt = '%.2f')
+	def save(self, filename = 'grid.txt'):
+		with open(filename, 'wb') as file:
+			for line in self.frames[0]:
+				savetxt(file, line, fmt = '%.2f')
 		print('Saved!')
 
-	def load(self, file):
-		self.grid = np.loadtxt(file)
+	def load(self, filename = 'grid.txt'):
+		self.frames[0] = loadtxt(file)
 		print('Loaded!')
 
-	def step(self):
-		grid = self.grid.copy()
-		for x in range(self.grid.shape[0]):
-			for y in range(self.grid.shape[1]):
-				summy = self.grid[x - 1:x + 2
-					             ,y - 1:y + 2].sum()
 
-				if self.grid[x, y] == True:
-					if summy < 3 or summy > 4:
-						grid[x, y] = False
-				else:
-					if summy == 3:
-						grid[x, y] = True
-		self.grid = grid
+	def randomize(self, boole = True):
+		'''Boole lets you just make an empty grid for False.
+		True actually randomizes it all.
+		'''
+
+		choices = [False]
+
+		if boole == True:
+			choices.append(True)
+
+		self.frames = [matrix(random.choice(choices, size = self.dim))]
+
+	def step(self, steps = 1):
+		while steps != 0:
+			steps -= 1
+			curg   = self.frames[-1]
+			newg   = self.frames[-1].copy()
+
+			for x in range(curg.shape[0]):
+				for y in range(curg.shape[1]):
+					summy = curg[x - 1:x + 2
+								,y - 1:y + 2].sum()
+
+					if curg[x, y] == True:
+						if summy < 3 or summy > 4:
+							newg[x, y] = False
+					else:
+						if summy == 3:
+							newg[x, y] = True
+			self.frames.append(newg)
+
+	def skip(self, gen = 10):
+		self.step(10)
+		self.frames = self.frames[-1:]
+		self.display()
+		sleep(1)
+
 
 	def clear(self):
 		# windows
@@ -45,33 +71,21 @@ class GOL():
 			_ = system('clear')
 
 	def display(self):
-		display = ''
-
-		for x in range(self.grid.shape[0]):
-			for y in range(self.grid.shape[1]):
-				# display += self.conv[self.grid[x, y]]
-				sys.stdout.write(self.conv[self.grid[x, y]])
+		for x in range(self.frames[0].shape[0]):
+			for y in range(self.frames[0].shape[1]):
+				sys.stdout.write(self.conv[self.frames[0][x, y]])
 			sys.stdout.write('\n')
-			# display += '\n'
-		# print(display[:-2])
+		
 
-	def play(self):
+	def play(self, time = 0):
 		while True:
 			try:
-				self.display()
-				self.step()
 				self.clear()
+				self.display()
+				if len(self.frames) == 1:
+					self.step(1)
+				self.frames = self.frames[1:]
+				if time != 0:
+					sleep(time)
 			except KeyboardInterrupt:
 				break
-
-	def skip(self, gen):
-		while gen != 0:
-			gen -= 1
-			self.step()
-		self.display()
-
-stuff = GOL()
-# stuff.load('grid.txt')
-# stuff.skip(10)
-# sleep(1)
-stuff.play()
